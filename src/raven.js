@@ -45,10 +45,12 @@ function Raven() {
         includePaths: [],
         crossOrigin: 'anonymous',
         collectWindowErrors: true,
-        maxMessageLength: 0
+        maxMessageLength: 0,
+        stackTraceLimit: Infinity
     };
     this._ignoreOnError = 0;
     this._isRavenInstalled = false;
+    this._originalErrorStackTraceLimit = Error.stackTraceLimit;
     // capture references to window.console *and* all its methods first
     // before the console plugin has a chance to monkey patch
     this._originalConsole = window.console || {};
@@ -168,6 +170,7 @@ Raven.prototype = {
             this._isRavenInstalled = true;
         }
 
+        Error.stackTraceLimit = this._globalOptions.stackTraceLimit;
         return this;
     },
 
@@ -270,6 +273,7 @@ Raven.prototype = {
      */
     uninstall: function() {
         TraceKit.report.uninstall();
+        Error.stackTraceLimit = this._originalErrorStackTraceLimit;
         this._isRavenInstalled = false;
 
         return this;
@@ -683,7 +687,7 @@ Raven.prototype = {
             stackInfo.message,
             stackInfo.url,
             stackInfo.lineno,
-            frames,
+            frames.slice(0, this._globalOptions.stackTraceLimit),
             options
         );
     },
