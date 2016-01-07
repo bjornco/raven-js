@@ -615,10 +615,10 @@ Raven.prototype = {
             }
         });
 
-        var origOpen;
+        var origSend;
         if ('XMLHttpRequest' in window) {
-            origOpen = XMLHttpRequest.prototype.open;
-            fill(XMLHttpRequest.prototype, 'open', function(origOpen) {
+            origSend = XMLHttpRequest.prototype.send;
+            fill(XMLHttpRequest.prototype, 'send', function(origOpen) {
                 return function (data) { // preserve arity
                     var xhr = this;
                     'onreadystatechange onload onerror onprogress'.replace(/\w+/g, function (prop) {
@@ -628,7 +628,7 @@ Raven.prototype = {
                             }, true /* noUndo */); // don't track filled methods on XHR instances
                         }
                     });
-                    origOpen.apply(this, arguments);
+                    origSend.apply(this, arguments);
                 };
             });
         }
