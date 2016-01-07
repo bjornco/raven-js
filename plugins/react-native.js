@@ -27,6 +27,12 @@ function reactNativePlugin(Raven) {
     }
 
     function xhrTransport(options) {
+
+        // Only consider last 20 lines of stack trace to avoid network request failing.
+        if (options.data.exception.values.length > 0) {
+            options.data.exception.values[0].stacktrace.frames = options.data.exception.values[0].stacktrace.frames.slice(-20);
+        }
+
         options.auth.sentry_data = JSON.stringify(options.data);
 
         var request = new XMLHttpRequest();
